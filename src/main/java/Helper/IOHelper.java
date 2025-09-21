@@ -26,6 +26,16 @@ public class IOHelper {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    public static void writeCompactString(DataOutputStream out, String s) throws IOException {
+        if (s == null) {
+            IOHelper.writeUnsignedVarInt(out, 0);
+            return;
+        }
+        byte[] data = s.getBytes(StandardCharsets.UTF_8);
+        IOHelper.writeUnsignedVarInt(out, data.length + 1);
+        out.write(data);
+    }
+
     /**
      * Schreibt einen UnsignedVarInt (Kafka VarInt-Encoding).
      *

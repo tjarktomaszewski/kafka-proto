@@ -1,19 +1,21 @@
-import Response.ApiKey;
-import Response.ApiKeyEntry;
-import Response.ErrorCode;
+package Service;
+
+import Request.KafkaRequest;
+import Request.KafkaRequestProcessor;
 import Response.KafkaResponse;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
+    private final KafkaRequestProcessor requestProcessor;
 
-    public ClientHandler(Socket clientSocket) {
+    public ClientHandler(Socket clientSocket, KafkaRequestProcessor requestProcessor) {
         this.clientSocket = clientSocket;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -24,9 +26,9 @@ public class ClientHandler implements Runnable {
             while (!clientSocket.isClosed() && clientSocket.isConnected()) {
                 try {
                     KafkaRequest request = KafkaRequest.parse(in);
-                    KafkaResponse response = processRequest(request);
+                    KafkaResponse response = requestProcessor.process(request);
                     response.send(dout);
-                    System.out.println("Process request with correlationId: " + request.getCorrelationId());
+                    System.out.println("Processed request with correlationId: " + request.getRequestHeader().getCorrelationId());
                 } catch (IOException e) {
                     System.out.println("Client disconnected");
                     break;
@@ -43,14 +45,5 @@ public class ClientHandler implements Runnable {
                 System.out.println("Error closing client socket: " + e.getMessage());
             }
         }
-    }
-
-    private KafkaResponse processRequest(KafkaRequest request) {
-        ErrorCode errorCode = ErrorCode.NONE;
-        if (request.getApiVersion() < 0 || request.getApiVersion() > 4) {
-            errorCode = ErrorCode.UNSUPPORTED_VERSION;
-        }
-        ArrayList<ApiKeyEntry> apiKeyEntries = ApiKeyEntry.getSupportedApiKeys();
-        return new KafkaResponse(request.getCorrelationId(), errorCode, apiKeyEntries);
     }
 }

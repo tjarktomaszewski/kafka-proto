@@ -28,7 +28,7 @@ public class ApiKeyEntry {
     public static ArrayList<ApiKeyEntry> getSupportedApiKeys() {
         ArrayList<ApiKeyEntry> apiKeyEntries = new ArrayList<>();
         apiKeyEntries.add(new ApiKeyEntry(ApiKey.fromCode((short) 18), (short) 0, (short) 4));
-        apiKeyEntries.add(new ApiKeyEntry(ApiKey.fromCode((short) 75), (short) 0, (short) 5));
+        apiKeyEntries.add(new ApiKeyEntry(ApiKey.fromCode((short) 75), (short) 0, (short) 0));
         return apiKeyEntries;
     }
 }
